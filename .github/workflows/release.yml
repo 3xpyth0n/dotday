@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*" # Runs whenever a semantic version tag is pushed
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract release version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Read changelog section
+        id: changelog
+        run: |
+          VERSION=${{ env.VERSION }}
+          # Extracts the section between "## [x.y.z]" and the next "## "
+          # Using awk with -v for safe variable passing and to avoid regex delimiter issues
+          awk -v ver="${VERSION#v}" '$0 ~ "^## \\[" ver "\\]" {flag=1; next} /^## / {flag=0} flag' CHANGELOG.md > RELEASE_NOTES.md
+
+          if [ ! -s RELEASE_NOTES.md ]; then
+            echo "❌ No matching section found in CHANGELOG.md for version ${VERSION#v}"
+            echo "Make sure CHANGELOG.md contains a section like: ## [${VERSION#v}]"
+            exit 1
+          fi
+
+      - name: Create GitHub release
+        if: env.ACT != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: DotDay ${{ env.VERSION }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          files: |
+            LICENSE
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Dry run release (act only)
+        if: env.ACT == 'true'
+        run: |
+          echo "🚀 [DRY RUN] Would create/update release ${{ env.VERSION }}"
+          echo "Release Notes:"
+          cat RELEASE_NOTES.md

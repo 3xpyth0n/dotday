@@ -1,0 +1,44 @@
+[setter]
+plugin = "swww"
+
+[display]
+resolution = [2560, 1440]
+show_month_name = true
+show_day_name = true
+show_accent_dot = true
+language = "en"
+
+[output]
+# output path where the generated image will be saved (can use ~)
+path = "~/.cache/dotday/wallpaper.png"
+
+[format]
+# format options: "alphabetic" or "numeric"
+# day_format controls how the day is shown (e.g. "Twenty-Nine" vs "29")
+day_format = "alphabetic"
+
+# month_format controls how the month is shown (e.g. "January" vs "1")
+month_format = "alphabetic"
+
+[colors]
+background = "#111111"
+dot_past = "#FFFFFF"
+dot_remaining = "#333333"
+dot_today = "#95122C"
+month_text = "#FFFFFF"
+day_text = "#FFFFFF"
+
+[font]
+month_size = 200
+day_size = 90
+month_font_path = "./fonts/month-font.ttf"
+day_font_path = "./fonts/day-font.ttf"
+
+[dots]
+size = 36
+spacing = 14
+columns = 7
+
+[advanced]
+# left margin for the day text
+day_text_margin = 20
